@@ -1,7 +1,7 @@
 package com.hmdp.controller;
 
-
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.hmdp.dto.LoginFormDTO;
 import com.hmdp.dto.Result;
 import com.hmdp.dto.UserDTO;
@@ -9,20 +9,16 @@ import com.hmdp.entity.User;
 import com.hmdp.entity.UserInfo;
 import com.hmdp.service.IUserInfoService;
 import com.hmdp.service.IUserService;
+import com.hmdp.utils.RedisConstants;
 import com.hmdp.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-/**
- * <p>
- * 前端控制器
- * </p>
- *
- * @author 虎哥
- */
 @Slf4j
 @RestController
 @RequestMapping("/user")
@@ -34,6 +30,12 @@ public class UserController {
     @Resource
     private IUserInfoService userInfoService;
 
+    @Resource
+    private HttpServletRequest request;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
     /**
      * 发送手机验证码
      */
@@ -44,8 +46,7 @@ public class UserController {
     }
 
     /**
-     * 登录功能
-     * @param loginForm 登录参数，包含手机号、验证码；或者手机号、密码
+     * 登录
      */
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm){
@@ -54,13 +55,40 @@ public class UserController {
     }
 
     /**
-     * 登出功能
-     * @return 无
+     * 登出
      */
     @PostMapping("/logout")
     public Result logout(){
-        // TODO 实现登出功能
-        return Result.fail("功能未完成");
+        try {
+            // 1.获取请求头中的token
+            String token = request.getHeader("authorization");
+
+            // 2.如果token为空，表示未登录，直接返回成功
+            if (StrUtil.isBlank(token)) {
+                // 清理ThreadLocal中的用户信息以防万一
+                UserHolder.removeUser();
+                return Result.ok("用户未登录，无需登出");
+            }
+
+            // 3.构建Redis中存储用户信息的key
+            String key = RedisConstants.LOGIN_USER_KEY + token;
+
+            // 4.删除Redis中的用户信息
+            Boolean deleted = stringRedisTemplate.delete(key);
+
+            // 5.清除当前线程ThreadLocal中的用户信息
+            UserHolder.removeUser();
+
+            // 6.返回登出成功
+            String message = deleted != null && deleted ? "登出成功" : "登出成功（用户信息已不存在）";
+            return Result.ok(message);
+
+        } catch (Exception e) {
+            log.error("登出异常", e);
+            // 出现异常也要清理ThreadLocal
+            UserHolder.removeUser();
+            return Result.fail("登出失败");
+        }
     }
 
     @GetMapping("/me")
