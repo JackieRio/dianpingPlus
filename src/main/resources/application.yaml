@@ -26,3 +26,18 @@ logging:
     com.hmdp: debug
   pattern:
     dateformat: mm:ss.SSS
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: seckill_group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.hmdp.dto
+      auto-offset-reset: latest
+      enable-auto-commit: false
+    listener:
+      ack-mode: manual_immediate
+      concurrency: 3
+
