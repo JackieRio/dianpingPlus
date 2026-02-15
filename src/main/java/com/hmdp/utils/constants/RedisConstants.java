@@ -16,7 +16,11 @@ public class RedisConstants {
 
     public static final String SECKILL_STOCK_KEY = "seckill:stock:";
     public static final String SECKILL_ORDER_KEY = "seckill:order:";
-    public static final Long SECKILL_ORDER_TTL = 3600L; // 订单信息缓存1小时
+    public static final Long SECKILL_ORDER_TTL = 3600L; //
+    // 缓存TTL设置
+    public static final Long SECKILL_STOCK_TTL = 30L; // 秒杀库存缓存30分钟
+    public static final Long VOUCHER_INFO_TTL = 60L;  // 优惠券信息缓存60分钟
+    public static final Long CACHE_CLEAN_TTL = 5L;    // 清理缓存的兜底TTL 5分钟// 订单信息缓存1小时
 
     public static final String BLOG_LIKED_KEY = "blog:liked:";
     public static final String FEED_KEY = "feed:";

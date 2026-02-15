@@ -54,5 +54,9 @@ redis.call('set', stockKey, cjson.encode(stockInfo))
 -- 9.添加用户到已下单集合
 redis.call('sadd', orderKey, userId)
 
--- 10.返回订单信息
+-- 10.设置库存key的TTL作为兜底机制
+redis.call('expire', stockKey, 1800)  -- 30分钟TTL
+redis.call('expire', orderKey, 1800)  -- 30分钟TTL
+
+-- 11.返回订单信息
 return orderId

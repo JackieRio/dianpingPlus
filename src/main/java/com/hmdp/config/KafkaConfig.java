@@ -17,7 +17,10 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
     public static final String SECKILL_ORDER_TOPIC = "seckill_order_topic";
+    public static final String CACHE_UPDATE_TOPIC = "cache_update_topic";
+    public static final String CACHE_CLEAN_TOPIC = "cache_clean_topic";
 
+    // 创建Kafka主题
     @Bean
     public NewTopic seckillOrderTopic(){
         return TopicBuilder.name(SECKILL_ORDER_TOPIC)
@@ -25,6 +28,26 @@ public class KafkaConfig {
                 .replicas(1)
                 .config("retention.ms", "86400000") // 保留24小时
                 .config("segment.bytes", "104857600") // 100MB段大小
+                .build();
+    }
+
+    // 创建缓存更新主题
+    @Bean
+    public NewTopic cacheUpdateTopic(){
+        return TopicBuilder.name(CACHE_UPDATE_TOPIC)
+                .partitions(3)
+                .replicas(1)
+                .config("retention.ms", "43200000") // 12小时
+                .build();
+    }
+
+    // 创建缓存清理主题
+    @Bean
+    public NewTopic cacheCleanTopic(){
+        return TopicBuilder.name(CACHE_CLEAN_TOPIC)
+                .partitions(2)
+                .replicas(1)
+                .config("retention.ms", "86400000") // 24小时
                 .build();
     }
 
@@ -39,6 +62,7 @@ public class KafkaConfig {
         return factory;
     }
 
+    // Kafka消费者工厂
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = new HashMap<>();

@@ -14,6 +14,7 @@ import com.hmdp.mapper.VoucherOrderMapper;
 import com.hmdp.service.ISeckillVoucherService;
 import com.hmdp.service.IVoucherOrderService;
 import com.hmdp.service.IVoucherService;
+import com.hmdp.utils.CacheManager;
 import com.hmdp.utils.constants.RedisConstants;
 import com.hmdp.utils.RedisIdWorker;
 import com.hmdp.utils.UserHolder;
@@ -31,6 +32,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +56,8 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private IVoucherService voucherService;
     @Resource
     private ObjectMapper objectMapper;
+    @Resource
+    private CacheManager cacheManager;
 
     // 定义引入Lua脚本
     private static final DefaultRedisScript<Long> ADVANCED_SECKILL_SCRIPT;
@@ -172,6 +176,43 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                 log.error("创建订单失败，订单ID:{}", orderId);
                 throw new RuntimeException("订单创建失败");
             }
+            // 异步更新缓存（发送消息到Kafka），避免阻塞主流程
+            CompletableFuture.runAsync(() -> {
+                try {
+                    // 查询最新的库存信息
+                    SeckillVoucher seckillVoucher = seckillVoucherService.getById(voucherId);
+                    if (seckillVoucher != null) {
+                        // 更新库存缓存
+                        SeckillStockInfo stockInfo = new SeckillStockInfo(
+                                seckillVoucher.getStock(),
+                                seckillVoucher.getBeginTime(),
+                                seckillVoucher.getEndTime()
+                        );
+                        cacheManager.updateCacheWithMessage(
+                                RedisConstants.SECKILL_STOCK_KEY + voucherId,
+                                stockInfo,
+                                30L, // 30秒TTL
+                                TimeUnit.MINUTES
+                        );
+
+                        // 更新优惠券信息缓存
+                        Voucher voucher = voucherService.getById(voucherId);
+                        if (voucher != null) {
+                            cacheManager.updateCacheWithMessage(
+                                    "voucher:" + voucherId,
+                                    voucher,
+                                    60L, // 60秒TTL
+                                    TimeUnit.MINUTES
+                            );
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("异步更新缓存失败，voucherId:{}", voucherId, e);
+                    // 发送缓存清理消息作为兜底
+                    cacheManager.sendCacheCleanMessage(RedisConstants.SECKILL_STOCK_KEY + voucherId);
+                    cacheManager.sendCacheCleanMessage("voucher:" + voucherId);
+                }
+            });
 
             log.info("秒杀订单创建成功，订单ID:{}", orderId);
         } finally {
