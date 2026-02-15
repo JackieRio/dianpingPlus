@@ -14,8 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static com.hmdp.utils.RedisConstants.CACHE_NULL_TTL;
-import static com.hmdp.utils.RedisConstants.LOCK_SHOP_KEY;
+import static com.hmdp.utils.constants.RedisConstants.CACHE_NULL_TTL;
+import static com.hmdp.utils.constants.RedisConstants.LOCK_SHOP_KEY;
 
 @Slf4j
 @Component
@@ -33,15 +33,7 @@ public class CacheClient {
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(value), time, unit);
     }
 
-    public void setWithLogicalExpire(String key, Object value, Long time, TimeUnit unit) {
-        // 设置逻辑过期
-        RedisData redisData = new RedisData();
-        redisData.setData(value);
-        redisData.setExpireTime(LocalDateTime.now().plusSeconds(unit.toSeconds(time)));
-        // 写入Redis
-        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(redisData));
-    }
-
+    // 缓存空值
     public <R,ID> R queryWithPassThrough(
             String keyPrefix, ID id, Class<R> type, Function<ID, R> dbFallback, Long time, TimeUnit unit){
         String key = keyPrefix + id;
@@ -72,6 +64,17 @@ public class CacheClient {
         return r;
     }
 
+    // 逻辑过期
+    public void setWithLogicalExpire(String key, Object value, Long time, TimeUnit unit) {
+        // 设置逻辑过期
+        RedisData redisData = new RedisData();
+        redisData.setData(value);
+        redisData.setExpireTime(LocalDateTime.now().plusSeconds(unit.toSeconds(time)));
+        // 写入Redis
+        stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(redisData));
+    }
+
+    // 逻辑过期查询
     public <R, ID> R queryWithLogicalExpire(
             String keyPrefix, ID id, Class<R> type, Function<ID, R> dbFallback, Long time, TimeUnit unit) {
         String key = keyPrefix + id;
@@ -79,7 +82,7 @@ public class CacheClient {
         String json = stringRedisTemplate.opsForValue().get(key);
         // 2.判断是否存在
         if (StrUtil.isBlank(json)) {
-            // 3.存在，直接返回
+            // 3.不存在，直接返回
             return null;
         }
         // 4.命中，需要先把json反序列化为对象
@@ -97,7 +100,7 @@ public class CacheClient {
         String lockKey = LOCK_SHOP_KEY + id;
         boolean isLock = tryLock(lockKey);
         // 6.2.判断是否获取锁成功
-        if (isLock){
+        if (isLock) {
             // 6.3.成功，开启独立线程，实现缓存重建
             CACHE_REBUILD_EXECUTOR.submit(() -> {
                 try {
@@ -106,17 +109,21 @@ public class CacheClient {
                     // 重建缓存
                     this.setWithLogicalExpire(key, newR, time, unit);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }finally {
+                    log.error("缓存重建失败，key: {}", key, e);
+                } finally {
                     // 释放锁
                     unlock(lockKey);
                 }
             });
+        } else {
+            // 获取锁失败，可能其他线程正在重建缓存
+            log.warn("获取锁失败，可能其他线程正在重建缓存，key: {}", key);
         }
         // 6.4.返回过期的商铺信息
         return r;
     }
 
+    // 互斥锁
     public <R, ID> R queryWithMutex(
             String keyPrefix, ID id, Class<R> type, Function<ID, R> dbFallback, Long time, TimeUnit unit) {
         String key = keyPrefix + id;

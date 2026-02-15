@@ -1,4 +1,4 @@
-package com.hmdp.utils;
+package com.hmdp.utils.constants;
 
 public class RedisConstants {
     public static final String LOGIN_CODE_KEY = "login:code:";

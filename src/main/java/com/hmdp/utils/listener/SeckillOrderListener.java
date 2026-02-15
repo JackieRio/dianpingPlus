@@ -1,4 +1,4 @@
-package com.hmdp.listener;
+package com.hmdp.utils.listener;
 
 import com.hmdp.config.KafkaConfig;
 import com.hmdp.dto.SeckillMessage;
@@ -27,7 +27,7 @@ public class SeckillOrderListener {
             ack.acknowledge();
         } catch (Exception e) {
             log.error("处理秒杀订单失败:{}", message, e);
-            // 可以添加重试机制或死信队列处理
+            // TODO 可以添加重试机制或死信队列处理
         }
     }
 }

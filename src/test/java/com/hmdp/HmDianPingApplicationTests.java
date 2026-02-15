@@ -20,8 +20,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.hmdp.utils.RedisConstants.CACHE_SHOP_KEY;
-import static com.hmdp.utils.RedisConstants.SHOP_GEO_KEY;
+import static com.hmdp.utils.constants.RedisConstants.CACHE_SHOP_KEY;
+import static com.hmdp.utils.constants.RedisConstants.SHOP_GEO_KEY;
 
 @SpringBootTest
 class HmDianPingApplicationTests {
