@@ -55,13 +55,9 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     @Resource
     private ObjectMapper objectMapper;
 
-    private static final DefaultRedisScript<Long> SECKILL_SCRIPT;
+    // 定义引入Lua脚本
     private static final DefaultRedisScript<Long> ADVANCED_SECKILL_SCRIPT;
     static {
-        SECKILL_SCRIPT = new DefaultRedisScript<>();
-        SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill.lua"));
-        SECKILL_SCRIPT.setResultType(Long.class);
-
         ADVANCED_SECKILL_SCRIPT = new DefaultRedisScript<>();
         ADVANCED_SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill_advanced.lua"));
         ADVANCED_SECKILL_SCRIPT.setResultType(Long.class);
@@ -91,7 +87,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         Long userId = UserHolder.getUser().getId();
         long orderId = redisIdWorker.nextId("order");
 
-        // 执行高级lua脚本（包含时间检查）
+        // 执行异步lua脚本（包含时间检查）
         Long result = stringRedisTemplate.execute(
                 ADVANCED_SECKILL_SCRIPT,
                 Collections.emptyList(),
