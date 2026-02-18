@@ -35,17 +35,22 @@ public class UserController {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+
     /**
      * 发送手机验证码
+     * @param phone 手机号
+     * @return
      */
     @PostMapping("code")
     public Result sendCode(@RequestParam("phone") String phone) {
         // 发送短信验证码并保存验证码
         return userService.sendCode(phone);
     }
-
+    
     /**
      * 登录
+     * @param loginForm 登录参数
+     * @return
      */
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm){
@@ -55,7 +60,9 @@ public class UserController {
 
     /**
      * 登出
+     * @return
      */
+
     @PostMapping("/logout")
     public Result logout(){
         try {
@@ -90,6 +97,10 @@ public class UserController {
         }
     }
 
+    /**
+     * 获取当前登录用户
+     * @return
+     */
     @GetMapping("/me")
     public Result me(){
         // 获取当前登录的用户并返回
@@ -97,6 +108,11 @@ public class UserController {
         return Result.ok(user);
     }
 
+    /**
+     * 根据id获取用户详情
+     * @param userId 用户ID
+     * @return
+     */
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Long userId){
         // 查询详情
@@ -111,6 +127,11 @@ public class UserController {
         return Result.ok(info);
     }
 
+    /**
+     * 根据id获取用户
+     * @param userId 用户ID
+     * @return
+     */
     @GetMapping("/{id}")
     public Result queryUserById(@PathVariable("id") Long userId){
         // 查询详情
@@ -123,11 +144,19 @@ public class UserController {
         return Result.ok(userDTO);
     }
 
+    /**
+     * 签到
+     * @return
+     */
     @PostMapping("/sign")
     public Result sign(){
         return userService.sign();
     }
 
+    /**
+     * 签到统计
+     * @return
+     */
     @GetMapping("/sign/count")
     public Result signCount(){
         return userService.signCount();

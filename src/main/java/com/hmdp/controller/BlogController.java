@@ -20,16 +20,31 @@ public class BlogController {
     @Resource
     private IBlogService blogService;
 
+    /**
+     * 保存博客
+     * @param blog
+     * @return
+     */
     @PostMapping
     public Result saveBlog(@RequestBody Blog blog) {
         return blogService.saveBlog(blog);
     }
 
+    /**
+     * 点赞
+     * @param id 点赞的博客ID
+     * @return
+     */
     @PutMapping("/like/{id}")
     public Result likeBlog(@PathVariable("id") Long id) {
         return blogService.likeBlog(id);
     }
 
+    /**
+     * 查询当前用户博客
+     * @param current 当前页码
+     * @return
+     */
     @GetMapping("/of/me")
     public Result queryMyBlog(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         // 获取登录用户
@@ -42,21 +57,42 @@ public class BlogController {
         return Result.ok(records);
     }
 
+    /**
+     * 查询热门博客
+     * @param current 当前页码
+     * @return
+     */
     @GetMapping("/hot")
     public Result queryHotBlog(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         return blogService.queryHotBlog(current);
     }
 
+    /**
+     * 根据id查询博客
+     * @param id 博客ID
+     * @return
+     */
     @GetMapping("/{id}")
     public Result queryBlogById(@PathVariable("id") Long id) {
         return blogService.queryBlogById(id);
     }
 
+    /**
+     * 查询点赞最高的博客
+     * @param id 博客ID
+     * @return
+     */
     @GetMapping("/likes/{id}")
     public Result queryBlogLikes(@PathVariable("id") Long id) {
         return blogService.queryBlogLikes(id);
     }
 
+    /**
+     * 查询用户博客
+     * @param current 当前页码
+     * @param id 用户ID
+     * @return
+     */
     @GetMapping("/of/user")
     public Result queryBlogByUserId(
             @RequestParam(value = "current", defaultValue = "1") Integer current,
@@ -69,6 +105,12 @@ public class BlogController {
         return Result.ok(records);
     }
 
+    /**
+     * 查询关注的博主的博客
+     * @param max 最新时间
+     * @param offset 偏移量
+     * @return
+     */
     @GetMapping("/of/follow")
     public Result queryBlogOfFollow(
             @RequestParam("lastId") Long max, @RequestParam(value = "offset", defaultValue = "0") Integer offset){

@@ -17,6 +17,11 @@ import java.util.UUID;
 @RequestMapping("upload")
 public class UploadController {
 
+    /**
+     * 上传图片
+     * @param image 上传的图片
+     * @return
+     */
     @PostMapping("blog")
     public Result uploadImage(@RequestParam("file") MultipartFile image) {
         try {
@@ -34,6 +39,11 @@ public class UploadController {
         }
     }
 
+    /**
+     * 删除图片
+     * @param filename 文件名
+     * @return
+     */
     @GetMapping("/blog/delete")
     public Result deleteBlogImg(@RequestParam("name") String filename) {
         File file = new File(SystemConstants.IMAGE_UPLOAD_DIR, filename);
@@ -44,6 +54,11 @@ public class UploadController {
         return Result.ok();
     }
 
+    /**
+     * 生成新的文件名
+     * @param originalFilename 原始文件名
+     * @return 新的文件名
+     */
     private String createNewFileName(String originalFilename) {
         // 获取后缀
         String suffix = StrUtil.subAfter(originalFilename, ".", true);
