@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import static com.hmdp.utils.constants.RedisConstants.*;
 import static com.hmdp.utils.constants.SystemConstants.USER_NICK_NAME_PREFIX;
 
-
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
@@ -52,7 +51,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY + phone, code, LOGIN_CODE_TTL, TimeUnit.MINUTES);
 
         // 5.发送验证码
-        log.debug("发送短信验证码成功，验证码：{}", code);
+        log.info("发送短信验证码成功，验证码：{}", code);
         // 返回ok
         return Result.ok();
     }
@@ -134,8 +133,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         List<Long> result = stringRedisTemplate.opsForValue().bitField(
                 key,
                 BitFieldSubCommands.create()
-                        .get(BitFieldSubCommands.BitFieldType.unsigned(dayOfMonth)).valueAt(0)
-        );
+                        .get(BitFieldSubCommands.BitFieldType.unsigned(dayOfMonth)).valueAt(0));
         if (result == null || result.isEmpty()) {
             // 没有任何签到结果
             return Result.ok(0);
@@ -147,11 +145,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 6.循环遍历
         int count = 0;
         while (true) {
-            // 6.1.让这个数字与1做与运算，得到数字的最后一个bit位  // 判断这个bit位是否为0
+            // 6.1.让这个数字与1做与运算，得到数字的最后一个bit位 // 判断这个bit位是否为0
             if ((num & 1) == 0) {
                 // 如果为0，说明未签到，结束
                 break;
-            }else {
+            } else {
                 // 如果不为0，说明已签到，计数器+1
                 count++;
             }

@@ -35,9 +35,9 @@ public class UserController {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-
     /**
      * 发送手机验证码
+     * 
      * @param phone 手机号
      * @return
      */
@@ -46,25 +46,27 @@ public class UserController {
         // 发送短信验证码并保存验证码
         return userService.sendCode(phone);
     }
-    
+
     /**
      * 登录
+     * 
      * @param loginForm 登录参数
      * @return
      */
     @PostMapping("/login")
-    public Result login(@RequestBody LoginFormDTO loginForm){
+    public Result login(@RequestBody LoginFormDTO loginForm) {
         // 实现登录功能
         return userService.login(loginForm);
     }
 
     /**
      * 登出
+     * 
      * @return
      */
 
     @PostMapping("/logout")
-    public Result logout(){
+    public Result logout() {
         try {
             // 1.获取请求头中的token
             String token = request.getHeader("authorization");
@@ -99,10 +101,11 @@ public class UserController {
 
     /**
      * 获取当前登录用户
+     * 
      * @return
      */
     @GetMapping("/me")
-    public Result me(){
+    public Result me() {
         // 获取当前登录的用户并返回
         UserDTO user = UserHolder.getUser();
         return Result.ok(user);
@@ -110,11 +113,12 @@ public class UserController {
 
     /**
      * 根据id获取用户详情
+     * 
      * @param userId 用户ID
      * @return
      */
     @GetMapping("/info/{id}")
-    public Result info(@PathVariable("id") Long userId){
+    public Result info(@PathVariable("id") Long userId) {
         // 查询详情
         UserInfo info = userInfoService.getById(userId);
         if (info == null) {
@@ -129,11 +133,12 @@ public class UserController {
 
     /**
      * 根据id获取用户
+     * 
      * @param userId 用户ID
      * @return
      */
     @GetMapping("/{id}")
-    public Result queryUserById(@PathVariable("id") Long userId){
+    public Result queryUserById(@PathVariable("id") Long userId) {
         // 查询详情
         User user = userService.getById(userId);
         if (user == null) {
@@ -146,19 +151,21 @@ public class UserController {
 
     /**
      * 签到
+     * 
      * @return
      */
     @PostMapping("/sign")
-    public Result sign(){
+    public Result sign() {
         return userService.sign();
     }
 
     /**
      * 签到统计
+     * 
      * @return
      */
     @GetMapping("/sign/count")
-    public Result signCount(){
+    public Result signCount() {
         return userService.signCount();
     }
 }

@@ -18,17 +18,11 @@ spring:
         min-idle: 1
         time-between-eviction-runs: 10s
   jackson:
-    default-property-inclusion: non_null # JSON处理时忽略非空字段
-mybatis-plus:
-  type-aliases-package: com.hmdp.entity # 别名扫描包
-logging:
-  level:
-    com.hmdp: debug
-  pattern:
-    dateformat: mm:ss.SSS
-
+    default-property-inclusion: non_null
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: 127.0.0.1:9092
+    admin:
+      operation-timeout: 30s
     consumer:
       group-id: seckill_group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -40,4 +34,11 @@ logging:
     listener:
       ack-mode: manual_immediate
       concurrency: 3
+mybatis-plus:
+  type-aliases-package: com.hmdp.entity
+logging:
+  level:
+    com.hmdp: debug
+  pattern:
+    dateformat: mm:ss.SSS
 
