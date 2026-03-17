@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Frontend ###
+node_modules/
+dist/
+build/
+.npm
+.yarn
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+.npmrc
+.yarnrc
+
+### Nginx Logs ###
+nginx-1.18.0/logs/*.log
+nginx-1.18.0/logs/*.pid
+nginx-1.18.0/nginx.exe
