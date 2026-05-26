@@ -46,12 +46,42 @@ public class UploadController {
      */
     @GetMapping("/blog/delete")
     public Result deleteBlogImg(@RequestParam("name") String filename) {
+        // 校验文件名，防止路径穿越
+        if (filename == null || filename.isEmpty()) {
+            return Result.fail("文件名不能为空");
+        }
+        // 检查是否包含路径穿越字符
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+            return Result.fail("非法的文件名称");
+        }
+        // 检查文件扩展名是否为图片
+        String suffix = StrUtil.subAfter(filename, ".", true);
+        if (!isValidImageSuffix(suffix)) {
+            return Result.fail("只允许删除图片文件");
+        }
         File file = new File(SystemConstants.IMAGE_UPLOAD_DIR, filename);
         if (file.isDirectory()) {
             return Result.fail("错误的文件名称");
         }
+        // 确保文件在上传目录内
+        if (!file.getAbsolutePath().startsWith(new File(SystemConstants.IMAGE_UPLOAD_DIR).getAbsolutePath())) {
+            return Result.fail("非法的文件路径");
+        }
         FileUtil.del(file);
         return Result.ok();
+    }
+
+    /**
+     * 校验图片文件后缀
+     */
+    private boolean isValidImageSuffix(String suffix) {
+        if (suffix == null || suffix.isEmpty()) {
+            return false;
+        }
+        String lowerSuffix = suffix.toLowerCase();
+        return "jpg".equals(lowerSuffix) || "jpeg".equals(lowerSuffix) ||
+               "png".equals(lowerSuffix) || "gif".equals(lowerSuffix) ||
+               "bmp".equals(lowerSuffix) || "webp".equals(lowerSuffix);
     }
 
     /**

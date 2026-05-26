@@ -25,12 +25,28 @@ local cjson = require "cjson"
 local stockInfo = cjson.decode(stockInfoJson)
 
 -- 5.检查秒杀时间
-local currentTime = redis.call('time')[1]
-if currentTime < stockInfo.beginTime then
+-- 获取当前时间（秒级时间戳）
+local currentTime = tonumber(redis.call('time')[1])
+-- 将ISO 8601格式时间转换为时间戳
+local function parseDateTime(dateStr)
+    -- 处理 "2024-01-01T10:00:00" 格式
+    local year, month, day, hour, min, sec = dateStr:match("(%d+)-(%d+)-(%d+)T(%d+):(%d+):(%d+)")
+    if year then
+        -- 使用os.time进行转换
+        return os.time({year=year, month=month, day=day, hour=hour, min=min, sec=sec})
+    end
+    -- 如果是数字时间戳，直接返回
+    return tonumber(dateStr)
+end
+
+local beginTime = parseDateTime(stockInfo.beginTime)
+local endTime = parseDateTime(stockInfo.endTime)
+
+if currentTime < beginTime then
     -- 秒杀未开始
     return 4
 end
-if currentTime > stockInfo.endTime then
+if currentTime > endTime then
     -- 秒杀已结束
     return 5
 end

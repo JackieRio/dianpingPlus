@@ -63,7 +63,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private static final DefaultRedisScript<Long> ADVANCED_SECKILL_SCRIPT;
     static {
         ADVANCED_SECKILL_SCRIPT = new DefaultRedisScript<>();
-        ADVANCED_SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill_advanced.lua"));
+        ADVANCED_SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill_advance.lua"));
         ADVANCED_SECKILL_SCRIPT.setResultType(Long.class);
     }
     private static final ExecutorService SECKILL_ORDER_EXECUTOR = Executors.newSingleThreadExecutor();

@@ -49,3 +49,6 @@ npm-debug.log*
 nginx-1.18.0/logs/*.log
 nginx-1.18.0/logs/*.pid
 nginx-1.18.0/nginx.exe
+
+### Docker ###
+.env.local

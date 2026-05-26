@@ -1,12 +1,16 @@
 package com.hmdp.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hmdp.dto.Result;
+import com.hmdp.dto.SeckillStockInfo;
 import com.hmdp.entity.SeckillVoucher;
 import com.hmdp.entity.Voucher;
 import com.hmdp.mapper.VoucherMapper;
 import com.hmdp.service.ISeckillVoucherService;
 import com.hmdp.service.IVoucherService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +28,7 @@ import static com.hmdp.utils.constants.RedisConstants.SECKILL_STOCK_KEY;
  * @author 虎哥
  * @since 2021-12-22
  */
+@Slf4j
 @Service
 public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> implements IVoucherService {
 
@@ -52,7 +57,18 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         seckillVoucher.setBeginTime(voucher.getBeginTime());
         seckillVoucher.setEndTime(voucher.getEndTime());
         seckillVoucherService.save(seckillVoucher);
-        // 保存秒杀库存到Redis中
-        stringRedisTemplate.opsForValue().set(SECKILL_STOCK_KEY + voucher.getId(), voucher.getStock().toString());
+        // 保存秒杀库存信息到Redis中（JSON格式，包含完整信息）
+        SeckillStockInfo stockInfo = new SeckillStockInfo(
+                voucher.getStock(),
+                voucher.getBeginTime(),
+                voucher.getEndTime()
+        );
+        try {
+            String json = new ObjectMapper().writeValueAsString(stockInfo);
+            stringRedisTemplate.opsForValue().set(SECKILL_STOCK_KEY + voucher.getId(), json);
+        } catch (JsonProcessingException e) {
+            log.error("Redis存储秒杀信息失败", e);
+            throw new RuntimeException("Redis存储秒杀信息失败");
+        }
     }
 }

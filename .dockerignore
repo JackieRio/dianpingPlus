@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iws
+*.iml
+*.ipr
+.vscode
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+.env
+
+# Nginx
+nginx-1.18.0/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
