@@ -25,8 +25,25 @@ public class UploadController {
     @PostMapping("blog")
     public Result uploadImage(@RequestParam("file") MultipartFile image) {
         try {
+            // 校验文件大小（最大5MB）
+            if (image.getSize() > 5 * 1024 * 1024) {
+                return Result.fail("文件大小不能超过5MB");
+            }
+            // 校验文件类型
+            String contentType = image.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return Result.fail("只允许上传图片文件");
+            }
             // 获取原始文件名称
             String originalFilename = image.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isEmpty()) {
+                return Result.fail("文件名不能为空");
+            }
+            // 校验文件后缀
+            String suffix = StrUtil.subAfter(originalFilename, ".", true);
+            if (!isValidImageSuffix(suffix)) {
+                return Result.fail("不支持的图片格式");
+            }
             // 生成新文件名
             String fileName = createNewFileName(originalFilename);
             // 保存文件

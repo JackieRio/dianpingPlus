@@ -28,13 +28,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -66,26 +62,6 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         ADVANCED_SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill_advance.lua"));
         ADVANCED_SECKILL_SCRIPT.setResultType(Long.class);
     }
-    private static final ExecutorService SECKILL_ORDER_EXECUTOR = Executors.newSingleThreadExecutor();
-    private volatile boolean isRunning = true;
-
-    @PreDestroy
-    public void stop() {
-        isRunning = false;
-    }
-
-    @PostConstruct
-    private void init() {
-        // 启动异步处理线程
-        SECKILL_ORDER_EXECUTOR.submit(new VoucherOrderHandler());
-    }
-
-    private class VoucherOrderHandler implements Runnable {
-        @Override
-        public void run() {
-        }
-    }
-
     /**
      * 秒杀优惠券
      * @param voucherId 优惠券ID
@@ -130,8 +106,8 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         Long voucherId = message.getVoucherId();
         Long orderId = message.getOrderId();
 
-        // 创建锁对象（使用订单ID作为锁key，避免用户重复下单问题）
-        RLock redisLock = redissonClient.getLock("lock:order:" + orderId);
+        // 创建锁对象（使用userId+voucherId作为锁key，确保同一用户同一优惠券的请求串行化）
+        RLock redisLock = redissonClient.getLock("lock:order:" + userId + ":" + voucherId);
         // 尝试获取锁（等待3秒，10秒后自动释放）
         boolean isLock = false;
         try {

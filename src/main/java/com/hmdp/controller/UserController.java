@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
@@ -54,7 +56,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public Result login(@RequestBody LoginFormDTO loginForm) {
+    public Result login(@Valid @RequestBody LoginFormDTO loginForm) {
         // 实现登录功能
         return userService.login(loginForm);
     }

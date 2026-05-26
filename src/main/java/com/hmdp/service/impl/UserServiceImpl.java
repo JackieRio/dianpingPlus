@@ -44,13 +44,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             // 2.如果不符合，返回错误信息
             return Result.fail("手机号格式错误！");
         }
-        // 3.符合，生成验证码
+        // 3.检查发送频率限制（60秒内只能发送一次）
+        String rateLimitKey = LOGIN_CODE_RATE_LIMIT_KEY + phone;
+        Boolean canSend = stringRedisTemplate.hasKey(rateLimitKey);
+        if (Boolean.TRUE.equals(canSend)) {
+            return Result.fail("发送验证码太频繁，请稍后再试");
+        }
+        // 4.符合，生成验证码
         String code = RandomUtil.randomNumbers(6);
 
-        // 4.保存验证码到 Redis
+        // 5.保存验证码到 Redis
         stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY + phone, code, LOGIN_CODE_TTL, TimeUnit.MINUTES);
 
-        // 5.发送验证码
+        // 6.设置发送频率限制
+        stringRedisTemplate.opsForValue().set(rateLimitKey, "1", LOGIN_CODE_RATE_LIMIT_TTL, TimeUnit.SECONDS);
+        // 7.发送验证码
         log.info("发送短信验证码成功，验证码：{}", code);
         // 返回ok
         return Result.ok();

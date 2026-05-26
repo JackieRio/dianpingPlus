@@ -51,4 +51,5 @@ nginx-1.18.0/logs/*.pid
 nginx-1.18.0/nginx.exe
 
 ### Docker ###
+.env
 .env.local

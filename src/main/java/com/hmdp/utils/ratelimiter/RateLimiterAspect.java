@@ -2,6 +2,7 @@ package com.hmdp.utils.ratelimiter;
 
 import com.hmdp.dto.UserDTO;
 import com.hmdp.utils.UserHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
+@Slf4j
 @Aspect
 @Component
 public class RateLimiterAspect {
@@ -37,7 +39,7 @@ public class RateLimiterAspect {
     // 前置拦截，注解了RateLimiter的方法
     @Before("@annotation(rateLimiter)")
     public void doBefore(JoinPoint point, RateLimiter rateLimiter) {
-        System.out.println("进入切面逻辑!!!");
+        log.debug("进入切面逻辑");
 
         // 获取注解上的参数
         String key = rateLimiter.key();
@@ -65,7 +67,7 @@ public class RateLimiterAspect {
      */
     public Long executeSlidingWindowScript(String key, Long window, Long limit) {
         long now = System.currentTimeMillis();
-        System.out.printf("key:%s, window:%d, limit:%d\n", key, window, limit);
+        log.debug("限流key:{}, window:{}, limit:{}", key, window, limit);
         return stringRedisTemplate.execute(
                 SLIDING_WINDOW_SCRIPT,
                 Collections.singletonList(key),
