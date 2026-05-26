@@ -2,14 +2,13 @@
 
 # 🔥 黑马点评 Plus
 
-### *一个让你面试 Offer 拿到手软的项目*
+### *让你 Offer 拿到手软的黑马点评魔改版*
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.3.12-green?style=flat-square&logo=spring-boot)](https://spring.io/projects/spring-boot)
 [![MyBatis Plus](https://img.shields.io/badge/MyBatis%20Plus-3.4.3-blue?style=flat-square)](https://baomidou.com/)
 [![Redis](https://img.shields.io/badge/Redis-6.x-red?style=flat-square&logo=redis)](https://redis.io/)
 [![Kafka](https://img.shields.io/badge/Kafka-2.x-orange?style=flat-square&logo=apache-kafka)](https://kafka.apache.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
 **基于黑马点评拓展开发，引入 Kafka 消息队列 + AOP 多维度限流**
 
@@ -68,8 +67,6 @@ cd hm-dianping-plus
 # 访问 http://localhost:8080
 ```
 
-就这么简单，**三个字：快、准、狠！** 🎉
-
 ### 方式二：本地开发模式
 
 ```bash
@@ -99,8 +96,6 @@ kafka-server-start config/server.properties
 # 5. 运行 HmDianPingApplication
 ```
 
-*手工党表示：仪式感拉满！* 🧙‍♂️
-
 ---
 
 ## 🏗️ 项目架构
@@ -109,13 +104,13 @@ kafka-server-start config/server.properties
 hm-dianping-plus/
 ├── 🎯 src/main/java/com/hmdp/
 │   ├── 📁 config/              # 配置中心（Redis、Kafka、跨域、拦截器）
-│   ├── 🎮 controller/          # REST 接口（给前端爸爸用的）
+│   ├── 🎮 controller/          # REST 接口（给前端用的）
 │   ├── ⚙️ service/             # 业务逻辑（核心战场）
-│   │   └── impl/               # 实现类（别问，问就是面向接口编程）
+│   │   └── impl/               # 实现类（问就是面向接口编程）
 │   ├── 🗄️ mapper/              # 数据访问（SQL 都在这）
 │   ├── 📦 entity/              # 实体类（数据库表的镜像）
 │   ├── 📨 dto/                 # 传输对象（接口的快递盒）
-│   └── 🔧 utils/               # 工具类（瑞士军刀们）
+│   └── 🔧 utils/               # 工具类（瑞士军刀）
 │       ├── CacheClient.java    # 缓存三剑客（穿透/击穿/雪崩）
 │       ├── RedisIdWorker.java  # 分布式 ID 生成器（雪花算法）
 │       ├── interceptor/        # 拦截器双雄（登录校验 + Token 刷新）
@@ -134,7 +129,7 @@ hm-dianping-plus/
 
 ## 💡 核心功能解析
 
-### 🔥 秒杀系统（面试必问！）
+### 🔥 秒杀系统
 
 ```
 用户请求 → Lua 原子校验 → Kafka 异步下单 → 数据库落库
